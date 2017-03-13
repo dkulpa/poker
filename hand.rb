@@ -1,4 +1,5 @@
 require_relative 'poker_error'
+require 'set'
 
 class Hand
   attr_accessor :cards, :value
@@ -24,80 +25,73 @@ class Hand
     hand_cards_int_values = @cards.map(&:int_value)
     hand_cards_colors = @cards.map(&:color)
 
-    royal_flush(hand_cards_values, hand_cards_colors)
-    straight_flush(hand_cards_int_values, hand_cards_colors)
-    four_of_kind(hand_cards_values)
-    full_house(hand_cards_values)
-    flush(hand_cards_colors)
-    straight(hand_cards_int_values)
-    three_of_kind(hand_cards_values)
-    two_pair(hand_cards_values)
-    one_pair(hand_cards_values)
+    if royal_flush(hand_cards_values, hand_cards_colors)
+      @value = 10
+    elsif straight_flush(hand_cards_int_values, hand_cards_colors)
+      @value = 9
+    elsif four_of_kind(hand_cards_values)
+      @value = 8
+    elsif full_house(hand_cards_values)
+      @value = 7
+    elsif flush(hand_cards_colors)
+      @value = 6
+    elsif straight(hand_cards_int_values)
+      @value = 5
+    elsif three_of_kind(hand_cards_values)
+      @value = 4
+    elsif two_pair(hand_cards_values)
+      @value = 3
+    elsif one_pair(hand_cards_values)
+      @value = 2
+    end
   end
 
   private
 
   def royal_flush(values, colors)
-    if @value == 0 &&
-      values.include?('A') &&
-      values.include?('K') &&
-      values.include?('Q') &&
-      values.include?('J') &&
-      values.include?('T') &&
-      colors.uniq.size == 1
-      @value = 10
-    end
+    @value == 0 &&
+    values.include?('A') &&
+    values.include?('K') &&
+    values.include?('Q') &&
+    values.include?('J') &&
+    values.include?('T') &&
+    colors.uniq.size == 1
+
   end
 
   def straight_flush(values, colors)
-    if @value == 0 && colors.uniq.size == 1 && sequential_rank(values)
-      @value = 9
-    end
+    @value == 0 && colors.uniq.size == 1 && sequential_rank(values)
   end
 
   def four_of_kind(values)
-    if @value == 0 && array_to_h_with_counter(values).values.include?(4)
-      @value = 8
-    end
+    @value == 0 && to_h_with_counter(values).values.include?(4)
   end
 
   def full_house(values)
-    if @value == 0 && array_to_h_with_counter(values).values.sort == [2, 3]
-      @value = 7
-    end
+    @value == 0 && to_h_with_counter(values).values.sort == [2, 3]
   end
 
   def flush(colors)
-    if @value == 0 && colors.uniq.size == 1
-      @value = 6
-    end
+    @value == 0 && colors.uniq.size == 1
   end
 
   def straight(values)
-    if @value == 0 && sequential_rank(values)
-      @value = 5
-    end
+    @value == 0 && sequential_rank(values)
   end
 
   def three_of_kind(values)
-    if @value == 0 && array_to_h_with_counter(values).values.include?(3)
-      @value = 4
-    end
+    @value == 0 && to_h_with_counter(values).values.include?(3)
   end
 
   def two_pair(values)
-    if @value == 0 && array_to_h_with_counter(values).values.sort == [1, 2, 2]
-      @value = 3
-    end
+    @value == 0 && to_h_with_counter(values).values.sort == [1, 2, 2]
   end
 
   def one_pair(values)
-    if @value == 0 && array_to_h_with_counter(values).values.sort == [1, 1, 1, 2]
-      @value = 2
-    end
+    @value == 0 && to_h_with_counter(values).values.sort == [1, 1, 1, 2]
   end
 
-  def array_to_h_with_counter(ary)
+  def to_h_with_counter(ary)
     ary.each_with_object(Hash.new(0)) { |element, counts| counts[element] += 1 }
   end
 

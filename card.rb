@@ -25,6 +25,8 @@ class Card
     @int_value < card.int_value
   end
 
+  private
+
   def value_to_i
     case @value
       when 'T'
